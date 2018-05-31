@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+
+
+<html lang="en">
+<head>
+<link rel="stylesheet" type="text/css"
+	href="../../webjars/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" />
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<body>
+
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item active"><a class="nav-link"
+					href="../../index.html">Home <span class="sr-only">(current)</span></a>
+				</li>				
+			</ul>
+			<form class="form-inline my-2 my-lg-0"
+				 method="post">
+				<input class="form-control mr-sm-2" type="text" placeholder="Search"
+					aria-label="Search" name="filter" value="">
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+			</form>
+		</div>
+	</nav>
+
+	<main role="main">
+
+	<div class="jumbotron">
+		<div class="container">
+			<h1 class="display-2">MyStore - Product Detail</h1>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4">
+				<h2>id</h2>
+			</div>
+			<div class="col-md-4">
+				<h2>name</h2>
+			</div>
+			<div class="col-md-4">
+				<h2>date</h2>
+			</div>
+		</div>
+		<div id='row'>
+		</div>		
+		<hr>
+		<a class="btn btn-primary btn-lg" href="javascript:history.go(-1)"
+			role="button">Back</a>
+	</div>
+	<!-- /container --> </main>
+	<script type="text/javascript"
+		src="../../webjars/bootstrap/4.0.0-beta.3/js/bootstrap.min.js">
+	</script>
+	<script>
+		$(document).ready(function(){
+			var getId = getId("id"); 
+			var urlRequest = "http://localhost:8080/product/by-id/?id=" + getId;
+			$.getJSON(urlRequest, function(result){							
+				$.each(result, function(i, field){		
+					var unit_content = "<div class='row'><div class='col-md-4'><p>{id}</p></div><div class='col-md-4'><p>{p_venue}</p></div><div class='col-md-4'><p>{date}</p></div></div>";
+					unit_content = unit_content.replace("{id}", field.id);
+					unit_content = unit_content.replace("{p_venue}", field.p_venue);
+					unit_content = unit_content.replace("{date}", field.date);				
+					$("#row").append(unit_content); 							
+				}); 				
+			});
+			
+			function getId(key){
+				var result = new RegExp(key + "=([^&]*)", "i").exec(window.location.search); 
+				return result && unescape(result[1]) || ""; 
+			};
+
+			$("form .btn").on("click", function (e){
+				var p_venue = $(".form-control").val();	
+				var urlRequest = "http://localhost:8080/product/by-p_venue/?p_venue=" + p_venue;
+				$("#row").empty();
+				$.getJSON(urlRequest, function(result){
+					if(result.length >= 1){							
+						$.each(result, function(i, field){
+							var newURL = "http://localhost:8080/product/by-id/?id=" + field.id;
+							var unit_content = "<div class='row'><div class='col-md-4'><p>{id}</p></div><div class='col-md-4'><p>{p_venue}</p></div><div class='col-md-4'><p>{date}</p></div></div>";
+							unit_content = unit_content.replace("{id}", field.id);
+							unit_content = unit_content.replace("{p_venue}", field.p_venue);
+							unit_content = unit_content.replace("{date}", field.date);
+							$("#row").append(unit_content);							
+							if (result.length == 1){				
+								history.pushState(null, '', newURL);
+							}						
+						});
+					}else{
+						$("#row").append("<h1>V_PENUE NOT FOUND, TRY TO SEARCH ANOTHER.</h1>");
+					}				
+				});
+				return false;
+			});
+		});
+	</script>
+</body>
+</html>
